@@ -98,7 +98,7 @@ lib/
       dashboard_controller.dart  # Firestore query + group-by-day aggregation
 
   shared/
-    home_shell.dart              # BottomNavigationBar (Timer | Dashboard | Categories)
+    home_shell.dart              # DefaultTabController + TabBar/TabBarView (Timer | Dashboard | Categories)
     firestore_service.dart       # CRUD wrapper for categories and sessions
 
 assets/
@@ -112,7 +112,9 @@ assets/
 
 ## Architecture Notes
 
-**Navigation:** `HomeShell` provides a `BottomNavigationBar` with three tabs: Timer | Dashboard | Categories. No `AuthGate` — the app works for signed-out users, they just can't save data.
+**Navigation:** `HomeShell` uses a `TabController` (via `DefaultTabController`) to coordinate a `TabBar` and `TabBarView` across three tabs: Timer | Dashboard | Categories. The `TabBar` is placed in `Scaffold.appBar.bottom`. No `AuthGate` — the app works for signed-out users, they just can't save data.
+
+`TabBarView` lazily builds tab content (unlike `IndexedStack`). Each screen should mix in `AutomaticKeepAliveClientMixin` and call `super.build(context)` to preserve its state when the user switches tabs and returns.
 
 **Auth:** Sign-in is surfaced inline (e.g. a button in the AppBar). Signed-out users see the full UI but with limited functionality:
 - Timer tab: fully functional; sessions are not written to Firestore.
@@ -131,12 +133,25 @@ assets/
 
 ---
 
+## dart:async Timer — Key API Notes
+
+Use `Timer.periodic(Duration(seconds: 1), callback)` for the countdown tick. The callback receives the `Timer` instance so you can call `cancel()` on it directly. Key members:
+- `Timer.periodic(Duration, void callback(Timer))` — fires repeatedly at the given interval
+- `Timer(Duration, void callback())` — fires once after the duration (use for one-shot events, not the countdown loop)
+- `timer.cancel()` — stops the timer; call this on reset and when the widget is disposed
+- `timer.isActive` — check before cancelling to avoid double-cancel errors
+- `timer.tick` — number of ticks fired so far (useful for debugging; don't use as a countdown source — decrement a `ValueNotifier<int>` instead)
+
+Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second ticks are fine but sub-millisecond precision is not available on web.
+
+---
+
 ## Implementation Order
 
 1. ✅ Flutter project scaffold + Firebase setup
 2. ✅ Google Sign-In (inline, no AuthGate — app is usable without sign-in)
 3. ✅ Timer screen UI (category picker with hardcoded defaults, duration picker, "Start session" button)
-4. `HomeShell` with `BottomNavigationBar` (Timer | Dashboard | Categories tabs)
+4. ✅ `HomeShell` with `DefaultTabController` + `TabBar` (in `AppBar.bottom`) + `TabBarView` (Timer | Dashboard | Categories tabs)
 5. Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
 6. Persistent mini-timer shown at top of app while a session is active
 7. Sound on completion (`audioplayers`)

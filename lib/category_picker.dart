@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/section_card.dart';
 
+final Set<Category> defaultCategories = {
+  Category(label: 'Dev', icon: Icons.code),
+  Category(label: 'Hobby', icon: Icons.sports_esports),
+  Category(label: 'Recreation', icon: Icons.self_improvement),
+  Category(label: 'Meetings', icon: Icons.groups),
+};
+
 class Category {
   final String label;
   final IconData icon;
