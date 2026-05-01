@@ -1,0 +1,45 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "my-pomodoro-b5569",
+          "appId": "1:80359379857:android:6d8867433c70356ea74030",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "my-pomodoro-b5569",
+          "configurations": {
+            "android": "1:80359379857:android:6d8867433c70356ea74030",
+            "ios": "1:80359379857:ios:ae4f5832d893b253a74030",
+            "macos": "1:80359379857:ios:ae4f5832d893b253a74030",
+            "web": "1:80359379857:web:aa3b83d7c1007e3ba74030",
+            "windows": "1:80359379857:web:f16c0d43f200209ba74030"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
