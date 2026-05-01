@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
       // home: const MyHomePage(title: 'Flutter Pomodoro'),
-      home: const HomeShell(),
+      home: HomeShell(),
     );
   }
 }

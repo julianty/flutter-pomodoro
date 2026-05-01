@@ -5,7 +5,8 @@ import 'category_picker.dart';
 import 'timer_picker.dart';
 
 class TimerScreen extends StatefulWidget {
-  const TimerScreen({super.key});
+  final TimerController controller;
+  const TimerScreen({super.key, required this.controller});
 
   @override
   State<TimerScreen> createState() => _TimerScreenState();
@@ -15,13 +16,6 @@ class _TimerScreenState extends State<TimerScreen> {
   Category? _selectedCategory;
 
   int _selectedDuration = 30;
-  late TimerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TimerController();
-  }
 
   void changeSelectedCategory(Category cat) {
     setState(() {
@@ -36,13 +30,13 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   void handleStart(BuildContext context) {
-    _controller.start(_selectedDuration * 60);
+    widget.controller.start(_selectedDuration * 60);
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) {
           return CountdownScreen(
-            timerController: _controller,
+            timerController: widget.controller,
             categoryName: _selectedCategory?.label,
           );
         },
@@ -111,11 +105,5 @@ class _TimerScreenState extends State<TimerScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
   }
 }

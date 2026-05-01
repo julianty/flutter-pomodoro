@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Implementation is underway. The Flutter scaffold, Firebase init, and Google Sign-In are done. The timer screen, countdown screen, and `TimerController` are wired up: "Start session" pushes `CountdownScreen` via `Navigator.push`, the `dart:async` countdown ticks via `ValueNotifier<int>`, and reset cancels and pops back. `HomeShell` has the three-tab layout (Timer | Dashboard | Categories) with placeholder screens for Dashboard and Categories. The flat `lib/` structure will be reorganized into `features/` at some point but is not an immediate priority.
 
+`TimerController` has been lifted to `HomeShell` and passed down to `TimerScreen` and `MiniTimer`. `MiniTimer` is scaffolded as a `StatelessWidget` using `ValueListenableBuilder` — full styling and conditional visibility (show only when `remainingSeconds > 0`) is deferred.
+
 ---
 
 ## Planned Tech Stack
