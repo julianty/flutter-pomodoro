@@ -22,7 +22,7 @@ class TimerPicker extends StatelessWidget {
           GridView.count(
             crossAxisCount: 4,
             crossAxisSpacing: 8.0,
-            childAspectRatio: 4.0,
+            childAspectRatio: 3.0,
             shrinkWrap: true,
             children: [
               for (var dur in [15, 30, 45, 60])

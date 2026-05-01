@@ -87,52 +87,63 @@ class _MyHomePageState extends State<MyHomePage> {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           final user = snapshot.data;
-          return Padding(
-            padding: const EdgeInsets.all(24.0), // Adjust the value as needed
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              spacing: 24,
-              children: [
-                UserGreeting(user: user),
-                CategoryPicker(
-                  categories: defaultCategories,
-                  selectedCategory: _selectedCategory,
-                  onChanged: changeSelectedCategory,
-                ),
-                TimerPicker(
-                  selectedDuration: _selectedDuration,
-                  selectedCategoryLabel: _selectedCategory?.label,
-                  onChanged: changeTimerDuration,
-                ),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 480
+                    ? 480
+                    : double.infinity,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(
+                  24.0,
+                ), // Adjust the value as needed
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  spacing: 24,
+                  children: [
+                    UserGreeting(user: user),
+                    CategoryPicker(
+                      categories: defaultCategories,
+                      selectedCategory: _selectedCategory,
+                      onChanged: changeSelectedCategory,
                     ),
-                    onPressed: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.arrow_right,
-                            color: colorScheme.onPrimary,
-                            size: 32,
+                    TimerPicker(
+                      selectedDuration: _selectedDuration,
+                      selectedCategoryLabel: _selectedCategory?.label,
+                      onChanged: changeTimerDuration,
+                    ),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                        ),
+                        onPressed: () {},
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.arrow_right,
+                                color: colorScheme.onPrimary,
+                                size: 32,
+                              ),
+                              Text(
+                                'Start session',
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(color: colorScheme.onPrimary),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'Start session',
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: colorScheme.onPrimary),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },
