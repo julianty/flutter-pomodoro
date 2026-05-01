@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-Implementation is underway. The Flutter scaffold, Firebase init, and Google Sign-In are done. A single-page UI exists with a hardcoded category picker, duration picker, timer preview, and a no-op "Start session" button. The flat `lib/` structure will be reorganized into `features/` at some point but is not an immediate priority.
+Implementation is underway. The Flutter scaffold, Firebase init, and Google Sign-In are done. The timer screen, countdown screen, and `TimerController` are wired up: "Start session" pushes `CountdownScreen` via `Navigator.push`, the `dart:async` countdown ticks via `ValueNotifier<int>`, and reset cancels and pops back. `HomeShell` has the three-tab layout (Timer | Dashboard | Categories) with placeholder screens for Dashboard and Categories. The flat `lib/` structure will be reorganized into `features/` at some point but is not an immediate priority.
 
 ---
 
@@ -152,7 +152,7 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 2. ✅ Google Sign-In (inline, no AuthGate — app is usable without sign-in)
 3. ✅ Timer screen UI (category picker with hardcoded defaults, duration picker, "Start session" button)
 4. ✅ `HomeShell` with `DefaultTabController` + `TabBar` (in `AppBar.bottom`) + `TabBarView` (Timer | Dashboard | Categories tabs)
-5. Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
+5. ✅ Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
 6. Persistent mini-timer shown at top of app while a session is active
 7. Sound on completion (`audioplayers`)
 8. Session write to Firestore on completion (signed-in users only)
