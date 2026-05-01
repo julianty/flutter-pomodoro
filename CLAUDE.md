@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-This repo is being converted from a bare Dart CLI scaffold into a Flutter app (web + iOS). The plan is established but implementation has not begun.
+Implementation is underway. The Flutter scaffold, Firebase init, and Google Sign-In are done. A single-page UI exists with a hardcoded category picker, duration picker, timer preview, and a no-op "Start session" button. The flat `lib/` structure will be reorganized into `features/` at some point but is not an immediate priority.
 
 ---
 
@@ -112,11 +112,18 @@ assets/
 
 ## Architecture Notes
 
-**Navigation:** `AuthGate` sits at the root and listens to `FirebaseAuth.instance.authStateChanges()`. Signed-out → `LoginScreen`. Signed-in → `HomeShell` (bottom nav with three tabs).
+**Navigation:** `HomeShell` provides a `BottomNavigationBar` with three tabs: Timer | Dashboard | Categories. No `AuthGate` — the app works for signed-out users, they just can't save data.
 
-**Timer logic:** `timer_controller.dart` drives a `dart:async` `Timer` ticking every second, decrementing a `ValueNotifier<int>`. On reaching 0 it plays a bundled sound via `AudioPlayer().play(AssetSource(...))`, writes a session to Firestore, and shows a completion dialog. Reset cancels the timer without writing a session.
+**Auth:** Sign-in is surfaced inline (e.g. a button in the AppBar). Signed-out users see the full UI but with limited functionality:
+- Timer tab: fully functional; sessions are not written to Firestore.
+- Categories tab: shows hardcoded defaults; Firestore CRUD is unavailable. Tab is visible with a sign-in prompt.
+- Dashboard tab: visible with skeleton placeholders where chart data would appear, plus a sign-in prompt.
 
-**Categories:** Read in the timer screen via a `StreamBuilder` on `users/{uid}/categories`. Colors chosen from a small fixed palette (no external color-picker library needed).
+**Timer flow:** "Start session" pushes a new full-screen countdown view via `Navigator.push`. When a session is active, a persistent mini-timer is shown at the top of the app (across all tabs). A back button on the countdown screen is a low-priority future addition. On reaching 0: play a sound, write a session to Firestore (if signed in), show a completion dialog. Reset cancels the timer without writing.
+
+**Timer logic:** `timer_controller.dart` drives a `dart:async` `Timer` ticking every second, decrementing a `ValueNotifier<int>`. On reaching 0 it plays a bundled sound via `AudioPlayer().play(AssetSource(...))`, writes a session to Firestore (if signed in), and shows a completion dialog. Reset cancels the timer without writing a session.
+
+**Categories:** When signed out, the category picker shows hardcoded defaults (icon + label). When signed in, it reads from `users/{uid}/categories` via a `StreamBuilder`, falling back to the hardcoded defaults if the user has none. Colors chosen from a small fixed palette (no external color-picker library needed).
 
 **Dashboard chart:** Queries sessions where `startedAt >= 7 days ago`, aggregates in Dart by `(date, categoryId)`, renders as a grouped `BarChart` from `fl_chart` — one group per day, one bar per category color. Y-axis in hours.
 
@@ -126,10 +133,14 @@ assets/
 
 ## Implementation Order
 
-1. Flutter project scaffold + Firebase setup
-2. Auth gate + Google Sign-In screen
-3. Categories CRUD
-4. Timer screen + controller (no sound)
-5. Sound on completion
-6. Session write to Firestore
-7. Dashboard chart
+1. ✅ Flutter project scaffold + Firebase setup
+2. ✅ Google Sign-In (inline, no AuthGate — app is usable without sign-in)
+3. ✅ Timer screen UI (category picker with hardcoded defaults, duration picker, "Start session" button)
+4. `HomeShell` with `BottomNavigationBar` (Timer | Dashboard | Categories tabs)
+5. Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
+6. Persistent mini-timer shown at top of app while a session is active
+7. Sound on completion (`audioplayers`)
+8. Session write to Firestore on completion (signed-in users only)
+9. Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out)
+10. Dashboard chart (`fl_chart`; signed-out users see skeleton + sign-in prompt)
+11. (Low priority) Refactor flat `lib/` into `features/` directory structure
