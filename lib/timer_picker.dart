@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/section_card.dart';
 import 'package:flutter_pomodoro/timer_ui.dart';
 
+const defaultDurations = [1, 15, 30, 45, 60];
+
 class TimerPicker extends StatelessWidget {
   final int selectedDuration;
   final Function(int) onChanged;
@@ -25,7 +27,7 @@ class TimerPicker extends StatelessWidget {
             childAspectRatio: 3.0,
             shrinkWrap: true,
             children: [
-              for (var dur in [15, 30, 45, 60])
+              for (var dur in defaultDurations)
                 DurationCard(
                   duration: dur,
                   active: selectedDuration == dur,

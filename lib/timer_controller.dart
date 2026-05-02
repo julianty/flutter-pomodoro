@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class TimerController {
   ValueNotifier<int> notifier = ValueNotifier(0);
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   Timer? _timer;
 
@@ -15,6 +17,7 @@ class TimerController {
       notifier.value = notifier.value - 1;
       if (notifier.value <= 0) {
         timer.cancel();
+        _audioPlayer.play(AssetSource('sounds/alarm.mp3'));
       }
     });
   }
@@ -27,5 +30,6 @@ class TimerController {
   void dispose() {
     _timer?.cancel();
     notifier.dispose();
+    _audioPlayer.dispose();
   }
 }

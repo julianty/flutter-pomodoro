@@ -1,6 +1,6 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/auth.dart';
-import 'package:flutter_pomodoro/mini_timer.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
 import 'package:flutter_pomodoro/timer_screen.dart';
 
