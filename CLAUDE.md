@@ -4,11 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-Implementation is underway. The Flutter scaffold, Firebase init, and Google Sign-In are done. The timer screen, countdown screen, and `TimerController` are wired up: "Start session" pushes `CountdownScreen` via `Navigator.push`, the `dart:async` countdown ticks via `ValueNotifier<int>`, and reset cancels and pops back. `HomeShell` has the three-tab layout (Timer | Dashboard | Categories) with placeholder screens for Dashboard and Categories. The flat `lib/` structure will be reorganized into `features/` at some point but is not an immediate priority.
+The core timer flow is fully wired up end-to-end. Flutter scaffold, Firebase init, and Google Sign-In are done. `HomeShell` has the three-tab layout (Timer | Dashboard | Categories); Dashboard and Categories tabs are still placeholder stubs.
 
-`TimerController` has been lifted to `HomeShell` and passed down to `TimerScreen` and `MiniTimer`. `MiniTimer` is scaffolded but is not an MVP feature — deferred to post-MVP.
+**Timer flow (complete):** "Start session" pushes `CountdownScreen` via `Navigator.push`. The countdown ticks via `dart:async` + `ValueNotifier<int>`. On reaching 0: looping alarm audio plays, the screen transitions to a STOP-only state. Tapping STOP stops audio and pops back. Pause/resume/reset are all wired. Reset pops without saving.
 
-Sound on completion is working (`audioplayers` + `alarm.mp3`). Sound asset selection/preference UI is a post-MVP improvement.
+**Session saving (complete):** On completion, `TimerController` saves the session to Firestore (`users/{uid}/sessions`) if the user is signed in, and appends a `CompletedSession` to an in-memory list. Sessions shorter than 60s are not saved to Firestore (partial-session guard). `firestore_service.dart` handles the Firestore write.
+
+**Session history (complete):** `TimerScreen` renders today's completed sessions below the start controls via `TimerHistory`. Each row shows category label and duration in minutes. (One-tap restart/pre-fill is not yet implemented.)
+
+**Sound:** `audioplayers` + `alarm.mp3` looping on completion. Sound asset selection/preference UI is a post-MVP improvement.
+
+`TimerController` is lifted to `HomeShell` and passed down. `MiniTimer` is scaffolded but deferred to post-MVP. The flat `lib/` structure will be reorganized into `features/` post-MVP.
 
 ---
 
@@ -160,7 +166,7 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 4. ✅ `HomeShell` with `DefaultTabController` + `TabBar` (in `AppBar.bottom`) + `TabBarView` (Timer | Dashboard | Categories tabs)
 5. ✅ Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
 6. ✅ Sound on completion (`audioplayers` + `alarm.mp3`)
-7. Completion flow: looping alarm audio + STOP button on countdown screen → pop to Timer tab + session write to Firestore (signed-in only) + today's session history list on Timer tab with one-tap Restart
+7. ✅ Completion flow: looping alarm audio + STOP button on countdown screen → pop to Timer tab + session write to Firestore (signed-in only) + today's session history list on Timer tab (one-tap restart/pre-fill not yet implemented)
 8. Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out)
 9. Dashboard chart (`fl_chart`; signed-out users see skeleton + sign-in prompt)
 10. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
