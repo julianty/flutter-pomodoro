@@ -27,16 +27,82 @@ class CountdownScreen extends StatelessWidget {
                 return Text('$minutes:$seconds');
               },
             ),
-            ElevatedButton(
-              onPressed: () {
-                timerController.reset();
-                Navigator.pop(context);
+            ValueListenableBuilder(
+              valueListenable: timerController.timerState,
+              builder: (context, value, child) {
+                return switch (value) {
+                  TimerState.running => PauseButton(
+                    onPressed: () => timerController.pause(),
+                  ),
+                  TimerState.paused => Row(
+                    children: [
+                      PlayButton(onPressed: () => timerController.resume()),
+                      ResetButton(
+                        onPressed: () {
+                          timerController.reset();
+                        },
+                      ),
+                      StopButton(
+                        onPressed: () {
+                          timerController.stop();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                  TimerState.completed => StopButton(
+                    onPressed: () {
+                      timerController.stop();
+                      Navigator.pop(context);
+                    },
+                  ),
+                  TimerState.idle => const SizedBox.shrink(),
+                };
               },
-              child: Text('reset'),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class ResetButton extends StatelessWidget {
+  final void Function() onPressed;
+  const ResetButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(onPressed: onPressed, child: Text('reset'));
+  }
+}
+
+class PauseButton extends StatelessWidget {
+  final void Function() onPressed;
+  const PauseButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(onPressed: onPressed, child: Text('pause'));
+  }
+}
+
+class PlayButton extends StatelessWidget {
+  final void Function() onPressed;
+  const PlayButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(onPressed: onPressed, child: Text('play'));
+  }
+}
+
+class StopButton extends StatelessWidget {
+  final void Function() onPressed;
+  const StopButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(onPressed: onPressed, child: Text('stop'));
   }
 }
