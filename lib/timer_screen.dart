@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/countdown_screen.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
+import 'package:flutter_pomodoro/timer_history.dart';
 import 'category_picker.dart';
 import 'timer_picker.dart';
 
@@ -71,6 +72,14 @@ class _TimerScreenState extends State<TimerScreen> {
                 onChanged: changeTimerDuration,
               ),
 
+              // TODO: Add a history reader here
+              ValueListenableBuilder(
+                valueListenable: widget.controller.completedSessions,
+                builder: (context, currentSessionList, child) {
+                  return TimerHistory(sessionList: currentSessionList);
+                },
+              ),
+              // Start button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_pomodoro/completed_session.dart';
+import 'package:flutter_pomodoro/firestore_service.dart';
 
 import 'category_picker.dart';
 
@@ -11,8 +13,9 @@ enum TimerState { idle, running, paused, completed }
 class TimerController {
   ValueNotifier<int> notifier = ValueNotifier(0);
   ValueNotifier<TimerState> timerState = ValueNotifier(TimerState.idle);
-  List<CompletedSession> completedSessions = [];
+  ValueNotifier<List<CompletedSession>> completedSessions = ValueNotifier([]);
   Category? category;
+  late DateTime startedAt;
   final AudioPlayer _audioPlayer = AudioPlayer();
   late int _initialDuration;
   Timer? _timer;
@@ -43,6 +46,8 @@ class TimerController {
     _initialDuration = seconds;
     notifier.value = seconds;
     _timer?.cancel();
+    // Record start time
+    startedAt = DateTime.now();
 
     // Change timer state
     timerState.value = TimerState.running;
@@ -92,14 +97,24 @@ class TimerController {
 
   void save() {
     int elapsed = _initialDuration - notifier.value;
-    completedSessions.add(
-      CompletedSession(
-        category: category,
-        timerDuration: Duration(
-          seconds: elapsed > 0 ? elapsed : _initialDuration,
-        ),
+
+    CompletedSession newSession = CompletedSession(
+      category: category,
+      timerDuration: Duration(
+        seconds: elapsed > 0 ? elapsed : _initialDuration,
       ),
+      startedAt: startedAt,
     );
+
+    // Save to internal list
+    completedSessions.value = [...completedSessions.value, newSession];
+
+    // Save to firestore
+    // get user
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      FirestoreService().saveSession(user.uid, newSession);
+    }
   }
 
   void dispose() {
