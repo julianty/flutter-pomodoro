@@ -129,7 +129,7 @@ assets/
 
 **Timer logic:** `timer_controller.dart` drives a `dart:async` `Timer` ticking every second, decrementing a `ValueNotifier<int>`. On reaching 0 it sets a `isComplete` flag (e.g. a second `ValueNotifier<bool>`), starts looping audio via `AudioPlayer`, and writes a session to Firestore (if signed in). The countdown screen listens to `isComplete` to swap its UI to the STOP button. Tapping STOP calls a `stopAlarm()` method on the controller (stops audio, resets state) then pops.
 
-**Today's session history:** `TimerController` maintains a `List<CompletedSession>` (category name + duration in seconds) appended to on each completion. `TimerScreen` renders this list below the start controls. Each row shows category + duration with a "Restart" button that pre-fills the category and duration and immediately starts a new session. The list is in-memory only (cleared on app restart); Firestore is the persistent record for signed-in users.
+**Today's session history:** `TimerController` maintains a `List<CompletedSession>` (category reference + duration in seconds) appended to on each completion. `CompletedSession` stores a reference to the `Category` object so that the displayed name always reflects the current category name. `TimerScreen` renders this list below the start controls. Each row shows category + duration with a "Restart" button that pre-fills the category and duration and immediately starts a new session. The list is in-memory only (cleared on app restart); Firestore is the persistent record for signed-in users. Note: the Firestore `categoryName` denormalization is deferred — to be revisited when the Firestore write is implemented.
 
 **Categories:** When signed out, the category picker shows hardcoded defaults (icon + label). When signed in, it reads from `users/{uid}/categories` via a `StreamBuilder`, falling back to the hardcoded defaults if the user has none. Colors chosen from a small fixed palette (no external color-picker library needed).
 
@@ -166,3 +166,4 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 10. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
 11. (Post-MVP) Sound asset selection / preference UI
 12. (Post-MVP) Refactor flat `lib/` into `features/` directory structure
+13. (Post-MVP) Reset confirmation dialog — currently `reset()` calls `stop()` which saves a partial session if ≥60s elapsed. Post-MVP: show a confirmation dialog on reset asking whether to save or discard the in-progress session before restarting.

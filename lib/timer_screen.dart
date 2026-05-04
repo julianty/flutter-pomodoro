@@ -30,7 +30,7 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   void handleStart(BuildContext context) {
-    widget.controller.start(_selectedDuration * 60);
+    widget.controller.start(_selectedDuration * 60, _selectedCategory);
     Navigator.push(
       context,
       MaterialPageRoute(
