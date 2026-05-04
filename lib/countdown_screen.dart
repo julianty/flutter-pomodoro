@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
+import 'package:flutter_pomodoro/timer_ui.dart';
 
 class CountdownScreen extends StatelessWidget {
   final TimerController timerController;
@@ -18,15 +19,20 @@ class CountdownScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(categoryName ?? 'no category'),
             ValueListenableBuilder(
               valueListenable: timerController.notifier,
               builder: (BuildContext context, value, child) {
-                String minutes = (value ~/ 60).toString().padLeft(2, '0');
-                String seconds = (value % 60).toString().padLeft(2, '0');
-                return Text('$minutes:$seconds');
+                Duration remainingDuration = Duration(
+                  seconds: timerController.notifier.value,
+                );
+                return TimerDisplay(
+                  categoryLabel: categoryName,
+                  displayDuration: remainingDuration,
+                  totalDuration: timerController.initialDuration,
+                );
               },
             ),
+            SizedBox(height: 24),
             ValueListenableBuilder(
               valueListenable: timerController.timerState,
               builder: (context, value, child) {
@@ -35,6 +41,7 @@ class CountdownScreen extends StatelessWidget {
                     onPressed: () => timerController.pause(),
                   ),
                   TimerState.paused => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       PlayButton(onPressed: () => timerController.resume()),
                       ResetButton(
@@ -73,7 +80,7 @@ class ResetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text('reset'));
+    return IconButton.filledTonal(onPressed: onPressed, icon: Icon(Icons.loop));
   }
 }
 
@@ -83,7 +90,7 @@ class PauseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text('pause'));
+    return IconButton.filled(onPressed: onPressed, icon: Icon(Icons.pause));
   }
 }
 
@@ -93,7 +100,11 @@ class PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text('play'));
+    // return ElevatedButton(onPressed: onPressed, child: Text('play'));
+    return IconButton.filled(
+      onPressed: onPressed,
+      icon: Icon(Icons.play_arrow),
+    );
   }
 }
 
@@ -103,6 +114,33 @@ class StopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text('stop'));
+    // return ElevatedButton(onPressed: onPressed, child: Text('stop'));
+    return IconButton.filledTonal(onPressed: onPressed, icon: Icon(Icons.stop));
+  }
+}
+
+class TimerDisplay extends StatelessWidget {
+  final Color? color;
+  final Duration displayDuration;
+  final Duration totalDuration;
+  final String? categoryLabel;
+  const TimerDisplay({
+    super.key,
+    this.color,
+    required this.displayDuration,
+    required this.totalDuration,
+    this.categoryLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedColor = color ?? Theme.of(context).colorScheme.primary;
+    double progress = displayDuration.inSeconds / totalDuration.inSeconds;
+    return TimerProgressIndicator(
+      progress: progress,
+      color: resolvedColor,
+      duration: displayDuration,
+      categoryLabel: categoryLabel,
+    );
   }
 }

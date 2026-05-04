@@ -22,9 +22,9 @@ class TimerPicker extends StatelessWidget {
       child: Column(
         children: [
           GridView.count(
-            crossAxisCount: 4,
+            crossAxisCount: 5,
             crossAxisSpacing: 8.0,
-            childAspectRatio: 3.0,
+            childAspectRatio: 2,
             shrinkWrap: true,
             children: [
               for (var dur in defaultDurations)
@@ -93,7 +93,7 @@ class TimerPreview extends StatelessWidget {
 
   String categoryString(String? selectedCategory) {
     if (selectedCategory != null) {
-      return 'for $selectedCategory';
+      return selectedCategory;
     } else {
       return '';
     }
@@ -106,7 +106,7 @@ class TimerPreview extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TimerProgressIndicator(
+          TimerProgressIndicator.preview(
             progress: 1,
             color: Theme.of(context).colorScheme.primary,
             duration: Duration(minutes: selectedDuration),
@@ -114,9 +114,8 @@ class TimerPreview extends StatelessWidget {
           SizedBox(width: 16),
           Column(
             children: [
-              Text(
-                '${Duration(minutes: selectedDuration).inMinutes}m session ${categoryString(selectedCategory)}',
-              ),
+              Text(categoryString(selectedCategory)),
+              Text('${Duration(minutes: selectedDuration).inMinutes}m session'),
             ],
           ),
         ],

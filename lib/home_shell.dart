@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/auth.dart';
+import 'package:flutter_pomodoro/dashboard_screen.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
 import 'package:flutter_pomodoro/timer_screen.dart';
 
@@ -31,7 +32,7 @@ class HomeShell extends StatelessWidget {
               child: TabBarView(
                 children: [
                   TimerScreen(controller: timerController),
-                  Center(child: Text('dashboard')),
+                  DashboardScreen(),
                   Center(child: Text('categories')),
                 ],
               ),

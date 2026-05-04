@@ -18,6 +18,7 @@ class TimerController {
   late DateTime startedAt;
   final AudioPlayer _audioPlayer = AudioPlayer();
   late int _initialDuration;
+  Duration get initialDuration => Duration(seconds: _initialDuration);
   Timer? _timer;
 
   void _startTicking(int seconds) {

@@ -72,7 +72,6 @@ class _TimerScreenState extends State<TimerScreen> {
                 onChanged: changeTimerDuration,
               ),
 
-              // TODO: Add a history reader here
               ValueListenableBuilder(
                 valueListenable: widget.controller.completedSessions,
                 builder: (context, currentSessionList, child) {
