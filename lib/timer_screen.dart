@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/countdown_screen.dart';
+import 'package:flutter_pomodoro/firestore_service.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
 import 'package:flutter_pomodoro/timer_history.dart';
 import 'category_picker.dart';
@@ -48,6 +50,7 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+    User? user = FirebaseAuth.instance.currentUser;
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -61,11 +64,27 @@ class _TimerScreenState extends State<TimerScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             spacing: 24,
             children: [
-              CategoryPicker(
-                categories: defaultCategories,
-                selectedCategory: _selectedCategory,
-                onChanged: changeSelectedCategory,
-              ),
+              if (user != null)
+                StreamBuilder(
+                  stream: FirestoreService().watchCategories(user.uid),
+                  builder: (context, snapshot) {
+                    List<Category>? categories = snapshot.data;
+                    return CategoryPicker(
+                      categories: categories?.isEmpty == true
+                          ? defaultCategories
+                          : categories ?? defaultCategories,
+                      selectedCategory: _selectedCategory,
+                      onChanged: changeSelectedCategory,
+                    );
+                  },
+                ),
+              if (user == null)
+                CategoryPicker(
+                  categories: defaultCategories,
+                  selectedCategory: _selectedCategory,
+                  onChanged: changeSelectedCategory,
+                ),
+
               TimerPicker(
                 selectedDuration: _selectedDuration,
                 selectedCategory: _selectedCategory,

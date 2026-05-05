@@ -12,6 +12,21 @@ const List<Color> defaultColors = [
   Colors.yellow,
 ];
 
+const List<IconData> defaultIcons = [
+  Icons.code,
+  Icons.sports_esports,
+  Icons.self_improvement,
+  Icons.groups,
+  Icons.menu_book,
+  Icons.fitness_center,
+  Icons.brush,
+  Icons.music_note,
+  Icons.science,
+  Icons.work_outline,
+  Icons.favorite_outline,
+  Icons.travel_explore,
+];
+
 class CategoryForm extends StatefulWidget {
   final Category? category;
   const CategoryForm({super.key, this.category});
@@ -23,6 +38,7 @@ class CategoryForm extends StatefulWidget {
 class _CategoryFormState extends State<CategoryForm> {
   late TextEditingController textController;
   Color _selectedColor = defaultColors.first;
+  IconData _selectedIcon = defaultIcons.first;
 
   bool get _isEditing => widget.category != null;
 
@@ -33,12 +49,19 @@ class _CategoryFormState extends State<CategoryForm> {
     if (widget.category != null) {
       textController.text = widget.category!.label;
       _selectedColor = widget.category!.color;
+      _selectedIcon = widget.category!.icon;
     }
   }
 
   void onSelectColor(Color color) {
     setState(() {
       _selectedColor = color;
+    });
+  }
+
+  void onSelectIcon(IconData icon) {
+    setState(() {
+      _selectedIcon = icon;
     });
   }
 
@@ -49,7 +72,7 @@ class _CategoryFormState extends State<CategoryForm> {
     final category = Category(
       color: _selectedColor,
       label: textController.text,
-      icon: Icons.ac_unit_outlined,
+      icon: _selectedIcon,
     );
 
     if (_isEditing) {
@@ -122,6 +145,36 @@ class _CategoryFormState extends State<CategoryForm> {
                     color: color,
                     onTap: onSelectColor,
                     selected: color == _selectedColor,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text('Icon', style: textTheme.labelLarge),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var icon in defaultIcons)
+                GestureDetector(
+                  onTap: () => onSelectIcon(icon),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: icon == _selectedIcon
+                          ? _selectedColor.withValues(alpha: 0.2)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: icon == _selectedIcon
+                            ? _selectedColor
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(icon, size: 22),
                   ),
                 ),
             ],

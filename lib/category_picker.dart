@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/section_card.dart';
 
-final Set<Category> defaultCategories = {
+final List<Category> defaultCategories = [
   Category(label: 'Dev', icon: Icons.code, color: Colors.brown, id: 'dev'),
   Category(
     label: 'Hobby',
@@ -21,7 +21,7 @@ final Set<Category> defaultCategories = {
     color: Colors.lightGreen,
     id: 'meetings',
   ),
-};
+];
 
 class Category {
   final String label;
@@ -38,7 +38,7 @@ class Category {
 }
 
 class CategoryPicker extends StatelessWidget {
-  final Set<Category> categories;
+  final List<Category> categories;
   final void Function(Category) onChanged;
   final Category? selectedCategory;
   const CategoryPicker({
