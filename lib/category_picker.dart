@@ -2,28 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/section_card.dart';
 
 final Set<Category> defaultCategories = {
-  Category(label: 'Dev', icon: Icons.code, color: Colors.brown),
+  Category(label: 'Dev', icon: Icons.code, color: Colors.brown, id: 'dev'),
   Category(
     label: 'Hobby',
     icon: Icons.sports_esports,
     color: Colors.deepOrangeAccent,
+    id: 'hobby',
   ),
   Category(
     label: 'Recreation',
     icon: Icons.self_improvement,
     color: Colors.blueGrey,
+    id: 'rec',
   ),
-  Category(label: 'Meetings', icon: Icons.groups, color: Colors.lightGreen),
+  Category(
+    label: 'Meetings',
+    icon: Icons.groups,
+    color: Colors.lightGreen,
+    id: 'meetings',
+  ),
 };
 
 class Category {
   final String label;
   final IconData icon;
   final Color color;
+  String? id;
+
   Category({
     required this.label,
     required this.icon,
     this.color = Colors.indigo,
+    this.id,
   });
 }
 
@@ -52,7 +62,7 @@ class CategoryPicker extends StatelessWidget {
           for (var cat in categories)
             CategoryCard(
               category: cat,
-              isActive: cat == selectedCategory,
+              isActive: cat.id == selectedCategory?.id,
               onTap: onChanged,
             ),
         ],

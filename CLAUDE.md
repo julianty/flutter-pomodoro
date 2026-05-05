@@ -14,6 +14,8 @@ The core timer flow is fully wired up end-to-end. Flutter scaffold, Firebase ini
 
 **Sound:** `audioplayers` + `alarm.mp3` looping on completion. Sound asset selection/preference UI is a post-MVP improvement.
 
+**Categories CRUD (in progress):** `FirestoreService` now has `saveCategory`, `updateCategory`, and `watchCategories` (returns `Stream<List<Category>>`). `Category` model has an `id` field (nullable; null for hardcoded defaults, Firestore doc ID for user-created categories). `CategoryScreen` uses a `StreamBuilder` wired to `watchCategories` and shows a sign-in prompt for signed-out users. A `FloatingActionButton` opens `CategoryForm` via `showModalBottomSheet`. `CategoryForm` has a name text field, a color palette picker (`ColorCircle` widgets with selection indicator), and saves via `FirestoreService().saveCategory`. `deleteCategory` is not yet implemented. The `CategoryPicker` on `TimerScreen` still uses hardcoded `defaultCategories` — wiring it to the Firestore stream is a next step.
+
 `TimerController` is lifted to `HomeShell` and passed down. `MiniTimer` is scaffolded but deferred to post-MVP. The flat `lib/` structure will be reorganized into `features/` post-MVP.
 
 ---
@@ -167,7 +169,7 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 5. ✅ Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
 6. ✅ Sound on completion (`audioplayers` + `alarm.mp3`)
 7. ✅ Completion flow: looping alarm audio + STOP button on countdown screen → pop to Timer tab + session write to Firestore (signed-in only) + today's session history list on Timer tab (one-tap restart/pre-fill not yet implemented)
-8. Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out)
+8. 🔄 Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out) — create/read/update done; delete not yet implemented; `TimerScreen` category picker not yet wired to Firestore stream
 9. Dashboard chart (`fl_chart`; signed-out users see skeleton + sign-in prompt)
 10. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
 11. (Post-MVP) Sound asset selection / preference UI
