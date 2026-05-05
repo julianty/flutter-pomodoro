@@ -38,7 +38,7 @@ class _TimerScreenState extends State<TimerScreen> {
         builder: (context) {
           return CountdownScreen(
             timerController: widget.controller,
-            categoryName: _selectedCategory?.label,
+            category: _selectedCategory,
           );
         },
       ),
@@ -68,7 +68,7 @@ class _TimerScreenState extends State<TimerScreen> {
               ),
               TimerPicker(
                 selectedDuration: _selectedDuration,
-                selectedCategoryLabel: _selectedCategory?.label,
+                selectedCategory: _selectedCategory,
                 onChanged: changeTimerDuration,
               ),
 

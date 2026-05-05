@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/timer_controller.dart';
 import 'package:flutter_pomodoro/timer_ui.dart';
 
 class CountdownScreen extends StatelessWidget {
   final TimerController timerController;
-  final String? categoryName;
+  final Category? category;
 
   const CountdownScreen({
     super.key,
     required this.timerController,
-    this.categoryName,
+    this.category,
   });
 
   @override
@@ -26,7 +27,8 @@ class CountdownScreen extends StatelessWidget {
                   seconds: timerController.notifier.value,
                 );
                 return TimerDisplay(
-                  categoryLabel: categoryName,
+                  categoryLabel: category?.label,
+                  color: category?.color,
                   displayDuration: remainingDuration,
                   totalDuration: timerController.initialDuration,
                 );

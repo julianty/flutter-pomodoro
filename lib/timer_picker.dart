@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/section_card.dart';
 import 'package:flutter_pomodoro/timer_ui.dart';
 
@@ -7,12 +8,12 @@ const defaultDurations = [1, 15, 30, 45, 60];
 class TimerPicker extends StatelessWidget {
   final int selectedDuration;
   final Function(int) onChanged;
-  final String? selectedCategoryLabel;
+  final Category? selectedCategory;
   const TimerPicker({
     super.key,
     required this.selectedDuration,
     required this.onChanged,
-    required this.selectedCategoryLabel,
+    required this.selectedCategory,
   });
 
   @override
@@ -37,7 +38,7 @@ class TimerPicker extends StatelessWidget {
           ),
           SizedBox(height: 24),
           TimerPreview(
-            selectedCategory: selectedCategoryLabel,
+            selectedCategory: selectedCategory,
             selectedDuration: selectedDuration,
           ),
         ],
@@ -84,16 +85,16 @@ class DurationCard extends StatelessWidget {
 
 class TimerPreview extends StatelessWidget {
   final int selectedDuration; //in minutes
-  final String? selectedCategory;
+  final Category? selectedCategory;
   const TimerPreview({
     super.key,
     required this.selectedDuration,
     this.selectedCategory,
   });
 
-  String categoryString(String? selectedCategory) {
-    if (selectedCategory != null) {
-      return selectedCategory;
+  String categoryString(String? categoryLabel) {
+    if (categoryLabel != null) {
+      return categoryLabel;
     } else {
       return '';
     }
@@ -108,13 +109,15 @@ class TimerPreview extends StatelessWidget {
         children: [
           TimerProgressIndicator.preview(
             progress: 1,
-            color: Theme.of(context).colorScheme.primary,
+            color:
+                selectedCategory?.color ??
+                Theme.of(context).colorScheme.onSurface,
             duration: Duration(minutes: selectedDuration),
           ),
           SizedBox(width: 16),
           Column(
             children: [
-              Text(categoryString(selectedCategory)),
+              Text(categoryString(selectedCategory?.label)),
               Text('${Duration(minutes: selectedDuration).inMinutes}m session'),
             ],
           ),
