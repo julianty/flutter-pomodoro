@@ -79,4 +79,14 @@ class FirestoreService {
     );
     return categoryStream;
   }
+
+  Future<void> deleteCategory(String uid, Category category) async {
+    CollectionReference categories = firestore.collection(
+      'users/$uid/categories',
+    );
+    categories
+        .doc(category.id)
+        .delete()
+        .catchError((error) => print("Failed to delete category"));
+  }
 }

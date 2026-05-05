@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/firestore_service.dart';
 
-List<Color> defaultColors = [
+const List<Color> defaultColors = [
   Colors.pinkAccent,
   Colors.blueGrey,
   Colors.deepOrange,
@@ -13,7 +13,8 @@ List<Color> defaultColors = [
 ];
 
 class CategoryForm extends StatefulWidget {
-  const CategoryForm({super.key});
+  final Category? category;
+  const CategoryForm({super.key, this.category});
 
   @override
   State<CategoryForm> createState() => _CategoryFormState();
@@ -23,10 +24,16 @@ class _CategoryFormState extends State<CategoryForm> {
   late TextEditingController textController;
   Color _selectedColor = defaultColors.first;
 
+  bool get _isEditing => widget.category != null;
+
   @override
   void initState() {
     super.initState();
     textController = TextEditingController();
+    if (widget.category != null) {
+      textController.text = widget.category!.label;
+      _selectedColor = widget.category!.color;
+    }
   }
 
   void onSelectColor(Color color) {
@@ -36,38 +43,100 @@ class _CategoryFormState extends State<CategoryForm> {
   }
 
   void onSaveCategory() {
-    User? user = FirebaseAuth.instance.currentUser;
-    Category category = Category(
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final category = Category(
       color: _selectedColor,
       label: textController.text,
-      icon: (Icons.ac_unit_outlined),
+      icon: Icons.ac_unit_outlined,
     );
-    FirestoreService().saveCategory(user!.uid, category);
+
+    if (_isEditing) {
+      category.id = widget.category!.id;
+      FirestoreService().updateCategory(user.uid, category);
+    } else {
+      FirestoreService().saveCategory(user.uid, category);
+    }
+  }
+
+  void handleDelete() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    FirestoreService().deleteCategory(user.uid, widget.category!);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(controller: textController),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              for (var color in defaultColors)
-                ColorCircle(
-                  color: color,
-                  onTap: onSelectColor,
-                  selected: color == _selectedColor,
+              Text(
+                _isEditing ? 'Edit category' : 'New category',
+                style: textTheme.titleMedium,
+              ),
+              if (_isEditing)
+                IconButton(
+                  icon: Icon(Icons.delete_outline, color: colors.error),
+                  onPressed: () {
+                    handleDelete();
+                    Navigator.pop(context);
+                  },
                 ),
             ],
           ),
-          TextButton(
+          const SizedBox(height: 16),
+          TextField(
+            controller: textController,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Name',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text('Color', style: textTheme.labelLarge),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (var color in defaultColors)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ColorCircle(
+                    color: color,
+                    onTap: onSelectColor,
+                    selected: color == _selectedColor,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
+            ),
             onPressed: () {
               onSaveCategory();
               Navigator.pop(context);
             },
-            child: Text('Save Category'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -76,8 +145,8 @@ class _CategoryFormState extends State<CategoryForm> {
 
   @override
   void dispose() {
-    super.dispose();
     textController.dispose();
+    super.dispose();
   }
 }
 
@@ -95,14 +164,29 @@ class ColorCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onTap(color);
-      },
+      onTap: () => onTap(color),
       child: Container(
-        decoration: selected
-            ? BoxDecoration(shape: BoxShape.circle, border: Border.all())
-            : null,
-        child: CircleAvatar(backgroundColor: color),
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: selected
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  width: 2.5,
+                )
+              : null,
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.5),
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
+        ),
       ),
     );
   }
