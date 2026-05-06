@@ -4,17 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-The core timer flow is fully wired up end-to-end. Flutter scaffold, Firebase init, and Google Sign-In are done. `HomeShell` has the three-tab layout (Timer | Dashboard | Categories); Dashboard and Categories tabs are still placeholder stubs.
+Steps 1–8 are complete. Next up: Dashboard chart (step 9).
 
-**Timer flow (complete):** "Start session" pushes `CountdownScreen` via `Navigator.push`. The countdown ticks via `dart:async` + `ValueNotifier<int>`. On reaching 0: looping alarm audio plays, the screen transitions to a STOP-only state. Tapping STOP stops audio and pops back. Pause/resume/reset are all wired. Reset pops without saving.
+**Completed:** Flutter scaffold + Firebase init, Google Sign-In, Timer screen UI, `HomeShell` tab layout, countdown screen with `dart:async` + `ValueNotifier<int>`, alarm audio on completion, session write to Firestore (signed-in, ≥60s guard), today's session history via `TimerHistory`, full Categories CRUD (`saveCategory`, `updateCategory`, `deleteCategory`, `watchCategories`) with `CategoryPicker` on `TimerScreen` wired to the Firestore stream (falls back to `defaultCategories` when signed out or stream is empty).
 
-**Session saving (complete):** On completion, `TimerController` saves the session to Firestore (`users/{uid}/sessions`) if the user is signed in, and appends a `CompletedSession` to an in-memory list. Sessions shorter than 60s are not saved to Firestore (partial-session guard). `firestore_service.dart` handles the Firestore write.
+**Dashboard (complete):** `DashboardScreen` uses two nested `StreamBuilder`s (sessions + categories). Shows three stat cards via `SectionCard.muted` (total time, session count, avg duration — all computed inline from `sessionDocs`). `CategoryPieChart` renders an `fl_chart` `PieChart` with color-coded slices by category duration and a legend showing label + percentage. `CategoryBreakdown` shows a `CategoryRow` per category with color dot, label, total duration, and count. Deleted-category sessions fall back to `Colors.grey` and label `'Uncategorized'`. Signed-out users see a sign-in prompt.
 
-**Session history (complete):** `TimerScreen` renders today's completed sessions below the start controls via `TimerHistory`. Each row shows category label and duration in minutes. (One-tap restart/pre-fill is not yet implemented.)
-
-**Sound:** `audioplayers` + `alarm.mp3` looping on completion. Sound asset selection/preference UI is a post-MVP improvement.
-
-**Categories CRUD (in progress):** `FirestoreService` now has `saveCategory`, `updateCategory`, and `watchCategories` (returns `Stream<List<Category>>`). `Category` model has an `id` field (nullable; null for hardcoded defaults, Firestore doc ID for user-created categories). `CategoryScreen` uses a `StreamBuilder` wired to `watchCategories` and shows a sign-in prompt for signed-out users. A `FloatingActionButton` opens `CategoryForm` via `showModalBottomSheet`. `CategoryForm` has a name text field, a color palette picker (`ColorCircle` widgets with selection indicator), and saves via `FirestoreService().saveCategory`. `deleteCategory` is not yet implemented. The `CategoryPicker` on `TimerScreen` still uses hardcoded `defaultCategories` — wiring it to the Firestore stream is a next step.
+**Deleted category / session history:** Session documents are immutable on delete — `categoryName` (and `categoryId`) remain on the session doc. The Dashboard will fall back to a neutral color for sessions whose `categoryId` no longer has a matching category document. Long-term: denormalize `color` onto the session at write time so history is fully self-contained regardless of category deletions.
 
 `TimerController` is lifted to `HomeShell` and passed down. `MiniTimer` is scaffolded but deferred to post-MVP. The flat `lib/` structure will be reorganized into `features/` post-MVP.
 
@@ -141,7 +137,7 @@ assets/
 
 **Categories:** When signed out, the category picker shows hardcoded defaults (icon + label). When signed in, it reads from `users/{uid}/categories` via a `StreamBuilder`, falling back to the hardcoded defaults if the user has none. Colors chosen from a small fixed palette (no external color-picker library needed).
 
-**Dashboard chart:** Queries sessions where `startedAt >= 7 days ago`, aggregates in Dart by `(date, categoryId)`, renders as a grouped `BarChart` from `fl_chart` — one group per day, one bar per category color. Y-axis in hours.
+**Dashboard chart:** Queries sessions where `startedAt >= 7 days ago`, aggregates in Dart by `(date, categoryId)`, renders as a grouped `BarChart` from `fl_chart` — one group per day, one bar per category color. Y-axis in hours. Sessions whose `categoryId` no longer has a matching category doc (deleted category) fall back to a neutral color on the chart. Long-term: denormalize `color` onto the session at write time.
 
 **Sound preference:** Stored in `shared_preferences` locally (not Firestore — it's a device preference, not user data).
 
@@ -169,8 +165,8 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 5. ✅ Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
 6. ✅ Sound on completion (`audioplayers` + `alarm.mp3`)
 7. ✅ Completion flow: looping alarm audio + STOP button on countdown screen → pop to Timer tab + session write to Firestore (signed-in only) + today's session history list on Timer tab (one-tap restart/pre-fill not yet implemented)
-8. 🔄 Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out) — create/read/update done; delete not yet implemented; `TimerScreen` category picker not yet wired to Firestore stream
-9. Dashboard chart (`fl_chart`; signed-out users see skeleton + sign-in prompt)
+8. ✅ Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out) — full create/read/update/delete implemented; `TimerScreen` category picker wired to Firestore stream
+9. ✅ Dashboard chart (`fl_chart`; signed-out users see sign-in prompt) — pie chart, category breakdown, and stat cards all wired to Firestore
 10. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
 11. (Post-MVP) Sound asset selection / preference UI
 12. (Post-MVP) Refactor flat `lib/` into `features/` directory structure

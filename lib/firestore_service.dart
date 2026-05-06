@@ -2,28 +2,50 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/completed_session.dart';
+import 'package:flutter_pomodoro/session_doc.dart';
 
 class FirestoreService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<DocumentReference<Object?>> saveSession(
+  Future<DocumentReference<SessionDoc>> saveSession(
     String uid,
     CompletedSession session,
   ) async {
     // Prepare collection ref
-    CollectionReference userCompletedSessions = firestore.collection(
-      'users/$uid/sessions',
-    );
+    CollectionReference<SessionDoc> userCompletedSessions = firestore
+        .collection('users/$uid/sessions')
+        .withConverter(
+          fromFirestore: SessionDoc.fromFirestore,
+          toFirestore: SessionDoc.toFirestore,
+        );
 
     // Unpack data from completedSession
-    Map<String, dynamic> data = {
-      'startedAt': session.startedAt,
-      'completedAt': session.completedAt,
-      'duration': session.timerDuration.inSeconds,
-      'categoryLabel': session.category?.label ?? 'none',
-    };
+    SessionDoc data = SessionDoc(
+      startedAt: session.startedAt,
+      completedAt: session.completedAt,
+      duration: session.timerDuration.inSeconds,
+      categoryLabel: session.category?.label ?? 'none',
+      categoryId: session.category?.id ?? 'none',
+    );
     // Upload to firestore
     return userCompletedSessions.add(data);
+  }
+
+  Stream<List<SessionDoc>> watchSessions(String uid) {
+    // Prepare collection ref
+    CollectionReference<SessionDoc> userCompletedSessions = firestore
+        .collection('users/$uid/sessions')
+        .withConverter<SessionDoc>(
+          fromFirestore: SessionDoc.fromFirestore,
+          toFirestore: SessionDoc.toFirestore,
+        );
+    Stream<QuerySnapshot<SessionDoc>> completedSessionsSnapshot =
+        userCompletedSessions.snapshots();
+
+    Stream<List<SessionDoc>> sessionDocStream = completedSessionsSnapshot.map(
+      (snapshot) => [for (var doc in snapshot.docs) doc.data()],
+    );
+    return sessionDocStream;
   }
 
   Map<String, dynamic> _unpackCategory(Category category) {
@@ -88,5 +110,26 @@ class FirestoreService {
         .doc(category.id)
         .delete()
         .catchError((error) => print("Failed to delete category"));
+  }
+
+  Future<Category?> getCategoryData(String uid, String categoryId) async {
+    DocumentReference docRef = firestore.doc(
+      'users/$uid/categories/$categoryId',
+    );
+    DocumentSnapshot docSnapshot = await docRef.get();
+
+    Map<String, dynamic>? data = docSnapshot.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      return null;
+    }
+    Category? category = Category(
+      id: docSnapshot.id,
+      color: Color(data['color']),
+      label: data['label'],
+      icon: data['icon'],
+    );
+
+    return category;
   }
 }
