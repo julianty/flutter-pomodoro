@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 Future<void> handleRedirectResult() async {
   try {
     await FirebaseAuth.instance.getRedirectResult();
+  } on FirebaseAuthException catch (_) {
   } catch (_) {}
 }
 

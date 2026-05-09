@@ -14,6 +14,8 @@ Steps 1–8 are complete. Next up: Dashboard chart (step 9).
 
 `TimerController` is lifted to `HomeShell` and passed down. `MiniTimer` is scaffolded but deferred to post-MVP. The flat `lib/` structure will be reorganized into `features/` post-MVP.
 
+**Known fix — duplicate Firebase init in `web/index.html`:** The Firebase Console web setup snippet (CDN `initializeApp` block) must NOT be present in `web/index.html` for Flutter web apps. Flutter's `firebase_core` package handles initialization itself. Leaving the snippet in registers a `[DEFAULT]` Firebase app with a different `appId` before Flutter's own init runs, causing auth state to be written to the wrong app instance and sign-in to silently fail on the deployed build.
+
 ---
 
 ## Planned Tech Stack

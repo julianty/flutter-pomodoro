@@ -18,7 +18,8 @@ class DashboardScreen extends StatelessWidget {
       return StreamBuilder(
         stream: FirestoreService().watchSessions(user.uid),
         builder: (context, sessionDocsSnapshot) {
-          if (!sessionDocsSnapshot.hasData) return CircularProgressIndicator();
+          if (sessionDocsSnapshot.hasError) return const Center(child: Text('Something went wrong'));
+          if (!sessionDocsSnapshot.hasData) return const Center(child: CircularProgressIndicator());
           List<SessionDoc> sessionDocs = sessionDocsSnapshot.data!;
           // Compute total time logged
           final totalTime = sessionDocs.fold(
@@ -37,7 +38,8 @@ class DashboardScreen extends StatelessWidget {
           return StreamBuilder(
             stream: FirestoreService().watchCategories(user.uid),
             builder: (context, categorySnapshot) {
-              if (!categorySnapshot.hasData) return CircularProgressIndicator();
+              if (categorySnapshot.hasError) return const Center(child: Text('Something went wrong'));
+              if (!categorySnapshot.hasData) return const Center(child: CircularProgressIndicator());
               List<Category> categories = categorySnapshot.data!;
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
