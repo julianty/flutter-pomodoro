@@ -72,7 +72,7 @@ class CategoryScreen extends StatelessWidget {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _a) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final category = categories[index];
                     return _CategoryListTile(

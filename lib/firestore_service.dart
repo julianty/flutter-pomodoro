@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/completed_session.dart';
+import 'package:flutter_pomodoro/icon_map.dart';
 import 'package:flutter_pomodoro/session_doc.dart';
 
 class FirestoreService {
@@ -51,7 +52,7 @@ class FirestoreService {
   Map<String, dynamic> _unpackCategory(Category category) {
     Map<String, dynamic> data = {
       'color': category.color.toARGB32(),
-      'icon': category.icon.codePoint,
+      'iconIdentifier': reverseIconMap[category.icon],
       'label': category.label,
     };
     return data;
@@ -93,7 +94,7 @@ class FirestoreService {
         for (var doc in snapshot.docs)
           Category(
             id: doc.id,
-            icon: IconData(doc['icon'], fontFamily: 'MaterialIcons'),
+            icon: iconMap[doc['iconIdentifier'] ?? 'development']!,
             label: doc['label'],
             color: Color(doc['color']),
           ),
@@ -109,7 +110,7 @@ class FirestoreService {
     categories
         .doc(category.id)
         .delete()
-        .catchError((error) => print("Failed to delete category"));
+        .catchError((error) => debugPrint("Failed to delete category: $error"));
   }
 
   Future<Category?> getCategoryData(String uid, String categoryId) async {
@@ -127,7 +128,7 @@ class FirestoreService {
       id: docSnapshot.id,
       color: Color(data['color']),
       label: data['label'],
-      icon: data['icon'],
+      icon: iconMap[data['iconIdentifier']] ?? iconMap['development']!,
     );
 
     return category;

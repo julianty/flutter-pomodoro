@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pomodoro/category_picker.dart';
 import 'package:flutter_pomodoro/firestore_service.dart';
+import 'package:flutter_pomodoro/icon_map.dart';
 
 const List<Color> defaultColors = [
   Colors.pinkAccent,
@@ -10,21 +11,6 @@ const List<Color> defaultColors = [
   Colors.green,
   Colors.deepPurple,
   Colors.yellow,
-];
-
-const List<IconData> defaultIcons = [
-  Icons.code,
-  Icons.sports_esports,
-  Icons.self_improvement,
-  Icons.groups,
-  Icons.menu_book,
-  Icons.fitness_center,
-  Icons.brush,
-  Icons.music_note,
-  Icons.science,
-  Icons.work_outline,
-  Icons.favorite_outline,
-  Icons.travel_explore,
 ];
 
 class CategoryForm extends StatefulWidget {
@@ -38,7 +24,7 @@ class CategoryForm extends StatefulWidget {
 class _CategoryFormState extends State<CategoryForm> {
   late TextEditingController textController;
   Color _selectedColor = defaultColors.first;
-  IconData _selectedIcon = defaultIcons.first;
+  String _selectedIconIdentifier = defaultIcons.first;
 
   bool get _isEditing => widget.category != null;
 
@@ -49,7 +35,7 @@ class _CategoryFormState extends State<CategoryForm> {
     if (widget.category != null) {
       textController.text = widget.category!.label;
       _selectedColor = widget.category!.color;
-      _selectedIcon = widget.category!.icon;
+      _selectedIconIdentifier = reverseIconMap[widget.category!.icon] ?? 'work';
     }
   }
 
@@ -59,9 +45,9 @@ class _CategoryFormState extends State<CategoryForm> {
     });
   }
 
-  void onSelectIcon(IconData icon) {
+  void onSelectIcon(String iconIdentifier) {
     setState(() {
-      _selectedIcon = icon;
+      _selectedIconIdentifier = iconIdentifier;
     });
   }
 
@@ -72,7 +58,7 @@ class _CategoryFormState extends State<CategoryForm> {
     final category = Category(
       color: _selectedColor,
       label: textController.text,
-      icon: _selectedIcon,
+      icon: iconMap[_selectedIconIdentifier]!,
     );
 
     if (_isEditing) {
@@ -156,25 +142,25 @@ class _CategoryFormState extends State<CategoryForm> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (var icon in defaultIcons)
+              for (var iconIdentifier in defaultIcons)
                 GestureDetector(
-                  onTap: () => onSelectIcon(icon),
+                  onTap: () => onSelectIcon(iconIdentifier),
                   child: Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: icon == _selectedIcon
+                      color: iconIdentifier == _selectedIconIdentifier
                           ? _selectedColor.withValues(alpha: 0.2)
                           : Colors.transparent,
                       border: Border.all(
-                        color: icon == _selectedIcon
+                        color: iconIdentifier == _selectedIconIdentifier
                             ? _selectedColor
                             : Colors.transparent,
                         width: 2,
                       ),
                     ),
-                    child: Icon(icon, size: 22),
+                    child: Icon(iconMap[iconIdentifier], size: 22),
                   ),
                 ),
             ],
