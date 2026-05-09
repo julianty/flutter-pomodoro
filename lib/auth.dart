@@ -1,6 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+Future<void> handleRedirectResult() async {
+  try {
+    await FirebaseAuth.instance.getRedirectResult();
+  } catch (_) {}
+}
+
 Future<UserCredential> signInWithGoogle() async {
   GoogleAuthProvider googleProvider = GoogleAuthProvider();
   return await FirebaseAuth.instance.signInWithPopup(googleProvider);
