@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/completed_session.dart';
-import 'package:flutter_pomodoro/section_card.dart';
+import 'package:flutter_pomodoro/models/completed_session.dart';
+import 'package:flutter_pomodoro/shared/section_card.dart';
 
 class TimerHistory extends StatelessWidget {
   final List<CompletedSession> sessionList;

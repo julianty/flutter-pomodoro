@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_pomodoro/completed_session.dart';
-import 'package:flutter_pomodoro/firestore_service.dart';
+import 'package:flutter_pomodoro/models/completed_session.dart';
+import 'package:flutter_pomodoro/services/firestore_service.dart';
 
-import 'category_picker.dart';
+import '../features/categories/category_picker.dart';
 
 enum TimerState { idle, running, paused, completed }
 

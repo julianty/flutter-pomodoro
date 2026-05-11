@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_pomodoro/home_shell.dart';
+import 'package:flutter_pomodoro/shared/home_shell.dart';
 import 'firebase_options.dart';
-import 'auth.dart';
+import 'services/auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

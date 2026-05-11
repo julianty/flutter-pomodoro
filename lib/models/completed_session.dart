@@ -1,4 +1,4 @@
-import 'category_picker.dart';
+import '../features/categories/category_picker.dart';
 
 class CompletedSession {
   Category? category;

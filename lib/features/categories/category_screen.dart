@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_form.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/firestore_service.dart';
+import 'package:flutter_pomodoro/features/categories/category_form.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/services/firestore_service.dart';
 
 class CategoryScreen extends StatelessWidget {
   const CategoryScreen({super.key});
@@ -62,9 +62,7 @@ class CategoryScreen extends StatelessWidget {
               ? Center(
                   child: Text(
                     'No categories yet',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -72,7 +70,7 @@ class CategoryScreen extends StatelessWidget {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: categories.length,
-                  separatorBuilder: (_, _a) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final category = categories[index];
                     return _CategoryListTile(

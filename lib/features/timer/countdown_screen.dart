@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/timer_controller.dart';
-import 'package:flutter_pomodoro/timer_ui.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/services/timer_controller.dart';
+import 'package:flutter_pomodoro/features/timer/timer_ui.dart';
 
 class CountdownScreen extends StatelessWidget {
   final TimerController timerController;

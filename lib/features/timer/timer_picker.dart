@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/section_card.dart';
-import 'package:flutter_pomodoro/timer_ui.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/shared/section_card.dart';
+import 'package:flutter_pomodoro/features/timer/timer_ui.dart';
 
 const defaultDurations = [1, 15, 30, 45, 60];
 

@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/category_pie_chart.dart';
-import 'package:flutter_pomodoro/firestore_service.dart';
-import 'package:flutter_pomodoro/section_card.dart';
-import 'package:flutter_pomodoro/session_doc.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/features/categories/category_pie_chart.dart';
+import 'package:flutter_pomodoro/services/firestore_service.dart';
+import 'package:flutter_pomodoro/shared/section_card.dart';
+import 'package:flutter_pomodoro/models/session_doc.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -18,8 +18,12 @@ class DashboardScreen extends StatelessWidget {
       return StreamBuilder(
         stream: FirestoreService().watchSessions(user.uid),
         builder: (context, sessionDocsSnapshot) {
-          if (sessionDocsSnapshot.hasError) return const Center(child: Text('Something went wrong'));
-          if (!sessionDocsSnapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (sessionDocsSnapshot.hasError) {
+            return const Center(child: Text('Something went wrong'));
+          }
+          if (!sessionDocsSnapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
           List<SessionDoc> sessionDocs = sessionDocsSnapshot.data!;
           // Compute total time logged
           final totalTime = sessionDocs.fold(
@@ -38,8 +42,12 @@ class DashboardScreen extends StatelessWidget {
           return StreamBuilder(
             stream: FirestoreService().watchCategories(user.uid),
             builder: (context, categorySnapshot) {
-              if (categorySnapshot.hasError) return const Center(child: Text('Something went wrong'));
-              if (!categorySnapshot.hasData) return const Center(child: CircularProgressIndicator());
+              if (categorySnapshot.hasError) {
+                return const Center(child: Text('Something went wrong'));
+              }
+              if (!categorySnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
               List<Category> categories = categorySnapshot.data!;
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),

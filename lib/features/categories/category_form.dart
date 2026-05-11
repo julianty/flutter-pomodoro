@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/firestore_service.dart';
-import 'package:flutter_pomodoro/icon_map.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/services/firestore_service.dart';
+import 'package:flutter_pomodoro/features/categories/icon_map.dart';
 
 const List<Color> defaultColors = [
   Colors.pinkAccent,

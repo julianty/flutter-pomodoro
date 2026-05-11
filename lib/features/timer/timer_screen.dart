@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/countdown_screen.dart';
-import 'package:flutter_pomodoro/firestore_service.dart';
-import 'package:flutter_pomodoro/timer_controller.dart';
-import 'package:flutter_pomodoro/timer_history.dart';
-import 'category_picker.dart';
+import 'package:flutter_pomodoro/features/timer/countdown_screen.dart';
+import 'package:flutter_pomodoro/services/firestore_service.dart';
+import 'package:flutter_pomodoro/services/timer_controller.dart';
+import 'package:flutter_pomodoro/features/timer/timer_history.dart';
+import '../categories/category_picker.dart';
 import 'timer_picker.dart';
 
 class TimerScreen extends StatefulWidget {

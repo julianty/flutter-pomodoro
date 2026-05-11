@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/category_picker.dart';
-import 'package:flutter_pomodoro/completed_session.dart';
-import 'package:flutter_pomodoro/icon_map.dart';
-import 'package:flutter_pomodoro/session_doc.dart';
+import 'package:flutter_pomodoro/features/categories/category_picker.dart';
+import 'package:flutter_pomodoro/models/completed_session.dart';
+import 'package:flutter_pomodoro/features/categories/icon_map.dart';
+import 'package:flutter_pomodoro/models/session_doc.dart';
 
 class FirestoreService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;

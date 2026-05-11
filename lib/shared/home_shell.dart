@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/auth.dart';
-import 'package:flutter_pomodoro/category_screen.dart';
-import 'package:flutter_pomodoro/dashboard_screen.dart';
-import 'package:flutter_pomodoro/timer_controller.dart';
-import 'package:flutter_pomodoro/timer_screen.dart';
+import 'package:flutter_pomodoro/services/auth.dart';
+import 'package:flutter_pomodoro/features/categories/category_screen.dart';
+import 'package:flutter_pomodoro/features/dashboard/dashboard_screen.dart';
+import 'package:flutter_pomodoro/services/timer_controller.dart';
+import 'package:flutter_pomodoro/features/timer/timer_screen.dart';
 
 class HomeShell extends StatelessWidget {
   HomeShell({super.key});

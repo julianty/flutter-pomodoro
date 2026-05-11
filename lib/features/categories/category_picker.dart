@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/section_card.dart';
+import 'package:flutter_pomodoro/shared/section_card.dart';
 
 final List<Category> defaultCategories = [
   Category(label: 'Dev', icon: Icons.code, color: Colors.brown, id: 'dev'),

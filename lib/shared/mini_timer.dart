@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pomodoro/timer_controller.dart';
+import 'package:flutter_pomodoro/services/timer_controller.dart';
 
 class MiniTimer extends StatelessWidget {
   final TimerController controller;
