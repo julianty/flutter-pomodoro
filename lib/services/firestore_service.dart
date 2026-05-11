@@ -49,6 +49,27 @@ class FirestoreService {
     return sessionDocStream;
   }
 
+  Stream<List<SessionDoc>> watchTodaysSessions(String uid) {
+    final now = DateTime.now();
+    final Timestamp todayMidnight = Timestamp.fromDate(
+      DateTime(now.year, now.month, now.day),
+    );
+    Query<SessionDoc> userCompletedSessions = firestore
+        .collection('users/$uid/sessions')
+        .withConverter<SessionDoc>(
+          fromFirestore: SessionDoc.fromFirestore,
+          toFirestore: SessionDoc.toFirestore,
+        )
+        .where("startedAt", isGreaterThan: todayMidnight);
+    Stream<QuerySnapshot<SessionDoc>> completedSessionsSnapshot =
+        userCompletedSessions.snapshots();
+
+    Stream<List<SessionDoc>> sessionDocStream = completedSessionsSnapshot.map(
+      (snapshot) => [for (var doc in snapshot.docs) doc.data()],
+    );
+    return sessionDocStream;
+  }
+
   Map<String, dynamic> _unpackCategory(Category category) {
     Map<String, dynamic> data = {
       'color': category.color.toARGB32(),

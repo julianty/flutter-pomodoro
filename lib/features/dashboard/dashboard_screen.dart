@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_pomodoro/features/categories/category_picker.dart';
 import 'package:flutter_pomodoro/features/categories/category_pie_chart.dart';
+import 'package:flutter_pomodoro/features/timer/timer_history.dart';
+import 'package:flutter_pomodoro/models/completed_session.dart';
 import 'package:flutter_pomodoro/services/firestore_service.dart';
 import 'package:flutter_pomodoro/shared/section_card.dart';
 import 'package:flutter_pomodoro/models/session_doc.dart';
@@ -35,7 +38,9 @@ class DashboardScreen extends StatelessWidget {
           final totalSessions = sessionDocs.length;
 
           // Compute Avg length
-          final avgSessionLength = totalTime / totalSessions;
+          final avgSessionLength = totalSessions > 0
+              ? totalTime / totalSessions
+              : 0;
 
           final textTheme = Theme.of(context).textTheme;
           final colorScheme = Theme.of(context).colorScheme;
@@ -122,10 +127,62 @@ class DashboardScreen extends StatelessWidget {
                       sessionDocs: sessionDocs,
                       categories: categories,
                     ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints.tightFor(height: 180),
 
-                    CategoryBreakdown(
-                      sessionDocs: sessionDocs,
-                      categories: categories,
+                            child: CategoryBreakdown(
+                              sessionDocs: sessionDocs,
+                              categories: categories,
+                            ),
+                          ),
+                        ),
+                        // Builder for timer history
+                        Expanded(
+                          child: StreamBuilder(
+                            stream: FirestoreService().watchTodaysSessions(
+                              user.uid,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Text('An error occured while fetching');
+                              }
+                              if (!snapshot.hasData) {
+                                return Text('No sessions yet today');
+                              }
+                              final List<SessionDoc> sessionDocs =
+                                  snapshot.data!;
+                              final List<CompletedSession> sessionList = [
+                                for (var doc in sessionDocs)
+                                  CompletedSession(
+                                    category: categories.firstWhereOrNull(
+                                      (cat) => cat.id == doc.categoryId,
+                                    ),
+                                    timerDuration: Duration(
+                                      seconds: doc.duration,
+                                    ),
+                                    startedAt: doc.startedAt,
+                                  ),
+                              ];
+                              final truncatedSessionList =
+                                  sessionList.length > 5
+                                  ? sessionList
+                                        .sublist(sessionList.length - 5)
+                                        .reversed
+                                        .toList()
+                                  : sessionList.reversed.toList();
+                              return SingleChildScrollView(
+                                child: TimerHistory(
+                                  sessionList: truncatedSessionList,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
