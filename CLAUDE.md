@@ -153,7 +153,9 @@ assets/
 
 **Categories:** When signed out, the category picker shows hardcoded defaults (icon + label). When signed in, it reads from `users/{uid}/categories` via a `StreamBuilder`, falling back to the hardcoded defaults if the user has none. Colors chosen from a small fixed palette (no external color-picker library needed).
 
-**Dashboard chart:** Queries sessions where `startedAt >= 7 days ago`, aggregates in Dart by `(date, categoryId)`, renders as a grouped `BarChart` from `fl_chart` — one group per day, one bar per category color. Y-axis in hours. Sessions whose `categoryId` no longer has a matching category doc (deleted category) fall back to a neutral color on the chart. Long-term: denormalize `color` onto the session at write time.
+**Dashboard time scale picker:** A segmented control at the top of `DashboardScreen` lets the user choose the time window: **Today** | **This Week** | **This Month**. Default is Today. All stat cards (total time, session count, avg duration), the pie chart, and the category breakdown all re-filter based on the selected window. The Firestore query range changes accordingly — `startedAt >= midnight local time` for Today, `>= start of current week (Monday)` for This Week, `>= start of current month` for This Month. The picker state is local (`StatefulWidget` — no need to persist across sessions).
+
+**Dashboard chart:** Aggregates sessions in Dart by `(date, categoryId)` within the selected time window, renders as a grouped `BarChart` from `fl_chart` — one group per day, one bar per category color. Y-axis in hours. Sessions whose `categoryId` no longer has a matching category doc (deleted category) fall back to a neutral color on the chart. Long-term: denormalize `color` onto the session at write time.
 
 **Sound preference:** Stored in `shared_preferences` locally (not Firestore — it's a device preference, not user data).
 
@@ -173,7 +175,7 @@ Apply theme in `main.dart`. Never reference hard-coded colors elsewhere — use 
 - `seconds == 0` → `"0sec"`
 No plural/singular distinction (always `"1hr"`, never `"1 hour"`). Apply to all duration displays: `DashboardScreen` stat cards, `CategoryBreakdown` rows, `TimerHistory` rows.
 
-**Dashboard data — ideation (post-MVP):** Two ideas under consideration — weekly comparisons (this week vs. last week per category) and per-category time targets (user sets a weekly hour goal; dashboard shows progress). Implementation details TBD; will be designed before development begins.
+**Dashboard data — ideation (post-MVP):** Per-category time targets (user sets a weekly hour goal; dashboard shows progress). Implementation details TBD; will be designed before development begins.
 
 ---
 
@@ -208,7 +210,8 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 14. Adaptive layout — add `flutter_adaptive_scaffold`; `HomeShell` switches to `NavigationRail` at ≥840dp; content max-width ~700px
 15. Bug fix — Today's sessions backed by Firestore: `TimerScreen` currently reads from the in-memory `completedSessions` list on `TimerController`, which clears on refresh. Add `watchTodaysSessions(uid)` to `FirestoreService` (query `startedAt >= midnight local time`); replace the `ValueListenableBuilder` in `TimerScreen` with a `StreamBuilder` on that stream (signed-in only; fall back to in-memory list when signed out).
 16. Edit timer history: tapping a session row in `TimerHistory` opens an edit sheet (category picker + duration picker); saves changes back to Firestore. Signed-in only — signed-out in-memory sessions are not editable.
-16. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
+17. Dashboard time scale picker — segmented control (Today | This Week | This Month) at top of `DashboardScreen`; all stats, pie chart, and category breakdown re-filter based on selection; default Today; picker state is local.
+17. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
 17. (Post-MVP) Sound asset selection / preference UI
 18. (Post-MVP) Light mode theme
 19. (Post-MVP) Reset confirmation dialog — currently `reset()` calls `stop()` which saves a partial session if ≥60s elapsed. Post-MVP: show a confirmation dialog on reset asking whether to save or discard the in-progress session before restarting.
