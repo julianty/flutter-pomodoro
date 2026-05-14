@@ -9,8 +9,63 @@ import 'package:flutter_pomodoro/services/firestore_service.dart';
 import 'package:flutter_pomodoro/shared/section_card.dart';
 import 'package:flutter_pomodoro/models/session_doc.dart';
 
-class DashboardScreen extends StatelessWidget {
+enum _TimeWindow {
+  today(0),
+  sevenDays(7),
+  thirtyDays(30);
+
+  final int days;
+  const _TimeWindow(this.days);
+}
+
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  _TimeWindow timeWindow = _TimeWindow.sevenDays;
+
+  DateTime computeStartDate(_TimeWindow timeWindow) {
+    return DateTime.now().subtract(Duration(days: timeWindow.days));
+  }
+
+  void handleTimeWindowSelect(_TimeWindow window) {
+    setState(() {
+      timeWindow = window;
+    });
+  }
+
+  String computeTimeString(int seconds) {
+    Duration totalDuration = Duration(seconds: seconds);
+    if (totalDuration.compareTo(Duration(minutes: 1)) < 0) {
+      // total duration is less than a minute
+      return '$seconds s';
+    }
+    if (totalDuration.compareTo(Duration(hours: 1)) < 0) {
+      // total duration is less than 1 hour
+      int minutes = totalDuration.inMinutes;
+      int leftoverSeconds = totalDuration.inSeconds - minutes * 60;
+      return '$minutes m $leftoverSeconds s';
+    }
+    // Total duration is greater than 1 hour
+    int hours = totalDuration.inHours;
+    int leftoverMinutes = totalDuration.inMinutes - hours * 60;
+    return '$hours h $leftoverMinutes m';
+  }
+
+  String timeWindowString(_TimeWindow window) {
+    switch (window) {
+      case _TimeWindow.today:
+        return 'today';
+      case _TimeWindow.sevenDays:
+        return 'this week';
+      case _TimeWindow.thirtyDays:
+        return 'last 30 days';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +82,10 @@ class DashboardScreen extends StatelessWidget {
           );
         }
         return StreamBuilder(
-          stream: FirestoreService().watchSessions(user.uid),
+          stream: FirestoreService().watchSessionsAfterDate(
+            user.uid,
+            computeStartDate(timeWindow),
+          ),
           builder: (context, sessionDocsSnapshot) {
             if (sessionDocsSnapshot.hasError) {
               return const Center(child: Text('Something went wrong'));
@@ -66,6 +124,26 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
+                      // Time window selectors
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () =>
+                                handleTimeWindowSelect(_TimeWindow.today),
+                            child: Text('Today'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                handleTimeWindowSelect(_TimeWindow.sevenDays),
+                            child: Text('7 days'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                handleTimeWindowSelect(_TimeWindow.thirtyDays),
+                            child: Text('30 days'),
+                          ),
+                        ],
+                      ),
                       // Top row of cards
                       Row(
                         children: [
@@ -77,13 +155,13 @@ class DashboardScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     style: textTheme.displaySmall,
-                                    '$totalTime s',
+                                    computeTimeString(totalTime),
                                   ),
                                   Text(
                                     style: textTheme.bodySmall?.copyWith(
                                       color: colorScheme.tertiary,
                                     ),
-                                    'this week',
+                                    timeWindowString(timeWindow),
                                   ),
                                 ],
                               ),
@@ -103,8 +181,7 @@ class DashboardScreen extends StatelessWidget {
                                     style: textTheme.bodySmall?.copyWith(
                                       color: colorScheme.tertiary,
                                     ),
-
-                                    'this week',
+                                    timeWindowString(timeWindow),
                                   ),
                                 ],
                               ),
@@ -118,7 +195,7 @@ class DashboardScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     style: textTheme.displaySmall,
-                                    '${avgSessionLength.round()}',
+                                    computeTimeString(avgSessionLength.round()),
                                   ),
                                   Text(
                                     style: textTheme.bodySmall?.copyWith(

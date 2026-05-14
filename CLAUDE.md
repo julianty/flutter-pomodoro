@@ -198,7 +198,7 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 1. ✅ Core scaffold — Flutter project + Firebase init, Google Sign-In (inline, no AuthGate), `HomeShell` tab layout (Timer | Dashboard | Categories)
 2. ✅ Timer — countdown screen via `Navigator.push`, `dart:async` countdown, looping alarm audio on completion, STOP button → pop + session write to Firestore (signed-in, ≥60s guard)
 3. ✅ Categories CRUD — Firestore-backed; signed-out users see hardcoded defaults; `TimerScreen` category picker wired to stream
-4. ✅ Dashboard — pie chart, category breakdown, and stat cards wired to Firestore; `TimerHistory` on dashboard reads from `watchTodaysSessions` stream; `ConnectionState.waiting` guard prevents signed-out flash on auth init
+4. ✅ Dashboard — pie chart, category breakdown, and stat cards wired to Firestore; `TimerHistory` on dashboard reads from `watchTodaysSessions` stream; `ConnectionState.waiting` guard prevents signed-out flash on auth init; time window picker (Today / 7 days / 30 days) via `_TimeWindow` enum + `watchSessionsAfterDate` in `FirestoreService`; stat card subtitles update dynamically with selected window
 5. ✅ Lib reorganization — `models/`, `services/`, `features/`, `shared/`, `utils/`
 
 **Up next:**
