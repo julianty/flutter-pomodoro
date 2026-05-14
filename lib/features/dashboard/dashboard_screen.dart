@@ -14,180 +14,192 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return Center(child: Text('Sign in to start saving and viewing data!'));
-    } else {
-      return StreamBuilder(
-        stream: FirestoreService().watchSessions(user.uid),
-        builder: (context, sessionDocsSnapshot) {
-          if (sessionDocsSnapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-          if (!sessionDocsSnapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          List<SessionDoc> sessionDocs = sessionDocsSnapshot.data!;
-          // Compute total time logged
-          final totalTime = sessionDocs.fold(
-            0,
-            (total, doc) => total + doc.duration,
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.userChanges(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        User? user = userSnapshot.data;
+        if (user == null) {
+          return Center(
+            child: Text('Sign in to start saving and viewing data!'),
           );
+        }
+        return StreamBuilder(
+          stream: FirestoreService().watchSessions(user.uid),
+          builder: (context, sessionDocsSnapshot) {
+            if (sessionDocsSnapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            }
+            if (!sessionDocsSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            List<SessionDoc> sessionDocs = sessionDocsSnapshot.data!;
+            // Compute total time logged
+            final totalTime = sessionDocs.fold(
+              0,
+              (total, doc) => total + doc.duration,
+            );
 
-          // Compute # of sessions
-          final totalSessions = sessionDocs.length;
+            // Compute # of sessions
+            final totalSessions = sessionDocs.length;
 
-          // Compute Avg length
-          final avgSessionLength = totalSessions > 0
-              ? totalTime / totalSessions
-              : 0;
+            // Compute Avg length
+            final avgSessionLength = totalSessions > 0
+                ? totalTime / totalSessions
+                : 0;
 
-          final textTheme = Theme.of(context).textTheme;
-          final colorScheme = Theme.of(context).colorScheme;
-          return StreamBuilder(
-            stream: FirestoreService().watchCategories(user.uid),
-            builder: (context, categorySnapshot) {
-              if (categorySnapshot.hasError) {
-                return const Center(child: Text('Something went wrong'));
-              }
-              if (!categorySnapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              List<Category> categories = categorySnapshot.data!;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SectionCard.muted(
-                            title: "TOTAL TIME",
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  style: textTheme.displaySmall,
-                                  '$totalTime s',
-                                ),
-                                Text(
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.tertiary,
+            final textTheme = Theme.of(context).textTheme;
+            final colorScheme = Theme.of(context).colorScheme;
+            return StreamBuilder(
+              stream: FirestoreService().watchCategories(user.uid),
+              builder: (context, categorySnapshot) {
+                if (categorySnapshot.hasError) {
+                  return const Center(child: Text('Something went wrong'));
+                }
+                if (!categorySnapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                List<Category> categories = categorySnapshot.data!;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Top row of cards
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SectionCard.muted(
+                              title: "TOTAL TIME",
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    style: textTheme.displaySmall,
+                                    '$totalTime s',
                                   ),
-                                  'this week',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: SectionCard.muted(
-                            title: "SESSIONS",
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  style: textTheme.displaySmall,
-                                  '$totalSessions',
-                                ),
-                                Text(
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.tertiary,
-                                  ),
-
-                                  'this week',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: SectionCard.muted(
-                            title: "AVG DURATION",
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  style: textTheme.displaySmall,
-                                  '${avgSessionLength.round()}',
-                                ),
-                                Text(
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.tertiary,
-                                  ),
-                                  'per session',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    CategoryPieChart(
-                      sessionDocs: sessionDocs,
-                      categories: categories,
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: CategoryBreakdown(
-                            sessionDocs: sessionDocs,
-                            categories: categories,
-                          ),
-                        ),
-                        // Builder for timer history
-                        Expanded(
-                          child: StreamBuilder(
-                            stream: FirestoreService().watchTodaysSessions(
-                              user.uid,
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Text('An error occured while fetching');
-                              }
-                              if (!snapshot.hasData) {
-                                return Text('No sessions yet today');
-                              }
-                              final List<SessionDoc> sessionDocs =
-                                  snapshot.data!;
-                              final List<CompletedSession> sessionList = [
-                                for (var doc in sessionDocs)
-                                  CompletedSession(
-                                    category: categories.firstWhereOrNull(
-                                      (cat) => cat.id == doc.categoryId,
+                                  Text(
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.tertiary,
                                     ),
-                                    timerDuration: Duration(
-                                      seconds: doc.duration,
-                                    ),
-                                    startedAt: doc.startedAt,
+                                    'this week',
                                   ),
-                              ];
-                              final truncatedSessionList =
-                                  sessionList.length > 5
-                                  ? sessionList
-                                        .sublist(sessionList.length - 5)
-                                        .reversed
-                                        .toList()
-                                  : sessionList.reversed.toList();
-                              return SingleChildScrollView(
-                                child: TimerHistory(
-                                  sessionList: truncatedSessionList,
-                                ),
-                              );
-                            },
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    }
+                          Expanded(
+                            child: SectionCard.muted(
+                              title: "SESSIONS",
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    style: textTheme.displaySmall,
+                                    '$totalSessions',
+                                  ),
+                                  Text(
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.tertiary,
+                                    ),
+
+                                    'this week',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: SectionCard.muted(
+                              title: "AVG DURATION",
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    style: textTheme.displaySmall,
+                                    '${avgSessionLength.round()}',
+                                  ),
+                                  Text(
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.tertiary,
+                                    ),
+                                    'per session',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      CategoryPieChart(
+                        sessionDocs: sessionDocs,
+                        categories: categories,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: CategoryBreakdown(
+                              sessionDocs: sessionDocs,
+                              categories: categories,
+                            ),
+                          ),
+                          // Builder for timer history
+                          Expanded(
+                            child: StreamBuilder(
+                              stream: FirestoreService().watchTodaysSessions(
+                                user.uid,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text(
+                                    'An error occured while fetching',
+                                  );
+                                }
+                                if (!snapshot.hasData) {
+                                  return Text('No sessions yet today');
+                                }
+                                final List<SessionDoc> sessionDocs =
+                                    snapshot.data!;
+                                final List<CompletedSession> sessionList = [
+                                  for (var doc in sessionDocs)
+                                    CompletedSession(
+                                      category: categories.firstWhereOrNull(
+                                        (cat) => cat.id == doc.categoryId,
+                                      ),
+                                      timerDuration: Duration(
+                                        seconds: doc.duration,
+                                      ),
+                                      startedAt: doc.startedAt,
+                                    ),
+                                ];
+                                final truncatedSessionList =
+                                    sessionList.length > 5
+                                    ? sessionList
+                                          .sublist(sessionList.length - 5)
+                                          .reversed
+                                          .toList()
+                                    : sessionList.reversed.toList();
+                                return SingleChildScrollView(
+                                  child: TimerHistory(
+                                    sessionList: truncatedSessionList,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 }
 

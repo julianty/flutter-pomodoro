@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-Steps 1–9 are complete. Next up: lib reorganization (step 10), then app theme, time formatting utility, and adaptive layout.
+Core features complete (steps 1–5 in the list below). Next up: app theme, time formatting utility, adaptive layout.
 
 **Completed:** Flutter scaffold + Firebase init, Google Sign-In, Timer screen UI, `HomeShell` tab layout, countdown screen with `dart:async` + `ValueNotifier<int>`, alarm audio on completion, session write to Firestore (signed-in, ≥60s guard), today's session history via `TimerHistory`, full Categories CRUD (`saveCategory`, `updateCategory`, `deleteCategory`, `watchCategories`) with `CategoryPicker` on `TimerScreen` wired to the Firestore stream (falls back to `defaultCategories` when signed out or stream is empty).
 
@@ -194,25 +194,23 @@ Browser note: JavaScript compilation caps granularity at ~4 ms, so 1-second tick
 
 ## Implementation Order
 
-1. ✅ Flutter project scaffold + Firebase setup
-2. ✅ Google Sign-In (inline, no AuthGate — app is usable without sign-in)
-3. ✅ Timer screen UI (category picker with hardcoded defaults, duration picker, "Start session" button)
-4. ✅ `HomeShell` with `DefaultTabController` + `TabBar` (in `AppBar.bottom`) + `TabBarView` (Timer | Dashboard | Categories tabs)
-5. ✅ Timer countdown screen — pushed via `Navigator.push` on "Start session"; includes `timer_controller.dart` with `dart:async` countdown and `ValueNotifier<int>`
-6. ✅ Sound on completion (`audioplayers` + `alarm.mp3`)
-7. ✅ Completion flow: looping alarm audio + STOP button on countdown screen → pop to Timer tab + session write to Firestore (signed-in only) + today's session history list on Timer tab (one-tap restart/pre-fill not yet implemented)
-8. ✅ Categories CRUD (Firestore-backed; signed-out users see hardcoded defaults; Categories tab shows sign-in prompt when signed out) — full create/read/update/delete implemented; `TimerScreen` category picker wired to Firestore stream
-9. ✅ Dashboard chart (`fl_chart`; signed-out users see sign-in prompt) — pie chart, category breakdown, and stat cards all wired to Firestore
-10. ✅ Lib reorganization — move flat `lib/` files into `models/`, `services/`, `features/` (timer, categories, dashboard), `shared/`, `utils/`
-11. App theme — dark mode only; Material 3 `ColorScheme.fromSeed` seed `#2563EB` with `copyWith` overrides for `secondary` (`#059669`), `tertiary` (`#FBBF24`), `surface` (`#1E293B`)
-12. **[BREAKING BUG]** Timer history overflow — `TimerHistory` list grows unbounded and causes a vertical overflow. Fix: wrap the history list in a fixed-height constrained container (e.g. `SizedBox` with `maxHeight`) with a scrollable `ListView` inside, so the timer controls above stay anchored and only the history scrolls independently. Do not wrap the whole screen in `SingleChildScrollView` — that would let the timer controls scroll off screen.
-13. Time formatting utility — `formatDuration(int seconds)` in `lib/utils/format_duration.dart`; apply to dashboard stat cards, category breakdown, and session history rows
-14. Adaptive layout — add `flutter_adaptive_scaffold`; `HomeShell` switches to `NavigationRail` at ≥840dp; content max-width ~700px
-15. Bug fix — Today's sessions backed by Firestore: `TimerScreen` currently reads from the in-memory `completedSessions` list on `TimerController`, which clears on refresh. Add `watchTodaysSessions(uid)` to `FirestoreService` (query `startedAt >= midnight local time`); replace the `ValueListenableBuilder` in `TimerScreen` with a `StreamBuilder` on that stream (signed-in only; fall back to in-memory list when signed out).
-16. Edit timer history: tapping a session row in `TimerHistory` opens an edit sheet (category picker + duration picker); saves changes back to Firestore. Signed-in only — signed-out in-memory sessions are not editable.
-17. Dashboard time scale picker — segmented control (Today | This Week | This Month) at top of `DashboardScreen`; all stats, pie chart, and category breakdown re-filter based on selection; default Today; picker state is local.
-17. (Post-MVP) Persistent mini-timer shown at top of app while a session is active
-17. (Post-MVP) Sound asset selection / preference UI
-18. (Post-MVP) Light mode theme
-19. (Post-MVP) Reset confirmation dialog — currently `reset()` calls `stop()` which saves a partial session if ≥60s elapsed. Post-MVP: show a confirmation dialog on reset asking whether to save or discard the in-progress session before restarting.
-20. (Post-MVP) Dashboard — weekly comparisons + per-category time targets (ideation phase; details TBD)
+**Completed milestones:**
+1. ✅ Core scaffold — Flutter project + Firebase init, Google Sign-In (inline, no AuthGate), `HomeShell` tab layout (Timer | Dashboard | Categories)
+2. ✅ Timer — countdown screen via `Navigator.push`, `dart:async` countdown, looping alarm audio on completion, STOP button → pop + session write to Firestore (signed-in, ≥60s guard)
+3. ✅ Categories CRUD — Firestore-backed; signed-out users see hardcoded defaults; `TimerScreen` category picker wired to stream
+4. ✅ Dashboard — pie chart, category breakdown, and stat cards wired to Firestore; `TimerHistory` on dashboard reads from `watchTodaysSessions` stream; `ConnectionState.waiting` guard prevents signed-out flash on auth init
+5. ✅ Lib reorganization — `models/`, `services/`, `features/`, `shared/`, `utils/`
+
+**Up next:**
+6. App theme — dark mode only; Material 3 `ColorScheme.fromSeed` seed `#2563EB` with `copyWith` overrides for `secondary` (`#059669`), `tertiary` (`#FBBF24`), `surface` (`#1E293B`)
+7. Time formatting utility — `formatDuration(int seconds)` in `lib/utils/format_duration.dart`; apply to dashboard stat cards, category breakdown, and session history rows
+8. Adaptive layout — `HomeShell` switches to `NavigationRail` at ≥840dp; content max-width ~700px
+9. Edit timer history — tapping a session row in `TimerHistory` opens an edit sheet (category picker + duration picker); saves changes back to Firestore; signed-in only
+10. Dashboard time scale picker — segmented control (Today | This Week | This Month) at top of `DashboardScreen`; all stats, pie chart, and category breakdown re-filter based on selection; default Today; picker state is local
+
+**Post-MVP:**
+- Persistent mini-timer shown at top of app while a session is active
+- Sound asset selection / preference UI
+- Light mode theme
+- Reset confirmation dialog — currently `reset()` cancels without prompting; post-MVP: ask whether to save or discard if ≥60s elapsed
+- Dashboard — weekly comparisons + per-category time targets (ideation phase; details TBD)
