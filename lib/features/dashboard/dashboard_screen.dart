@@ -131,13 +131,9 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints.tightFor(height: 180),
-
-                            child: CategoryBreakdown(
-                              sessionDocs: sessionDocs,
-                              categories: categories,
-                            ),
+                          child: CategoryBreakdown(
+                            sessionDocs: sessionDocs,
+                            categories: categories,
                           ),
                         ),
                         // Builder for timer history
